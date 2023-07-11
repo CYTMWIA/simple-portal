@@ -6,14 +6,34 @@ from flask import Flask, render_template
 
 import config
 
-app = Flask(__name__)
 
+class WebServer:
+    def __init__(self, root_dir, _config: config.Config) -> None:
+        self.root_dir = root_dir
+        self.config = _config
 
-@app.route("/")
-def index():
-    with open("config/content.yaml", "r") as f:
-        content = yaml.load(f, yaml.CFullLoader)
-    return render_template("index.html", content=content)
+        self.app = Flask(__name__)
+        self.bind_routes()
+
+    def bind_routes(self):
+        self.app.route("/")(self.make_index())
+
+    def run(self):
+        self.app.run(self.config.addr, self.config.port, debug=True)
+
+    def make_index(self):
+        config_dir = path.join(self.root_dir, "config")
+        content_path = path.join(config_dir, self.config.content_file)
+        content_path = path.abspath(content_path)
+        if not path.exists(content_path):
+            raise Exception(f"Content file not exists: {content_path}")
+
+        def index():
+            with open(content_path, "r", encoding="utf-8") as f:
+                content = yaml.load(f, yaml.CFullLoader)
+            return render_template("index.html", content=content)
+
+        return index
 
 
 class Main:
@@ -23,6 +43,8 @@ class Main:
 
         print(f"Root Dir: {self.root_dir}")
         print(f"Final Config: {self.config}")
+
+        self.run_app()
 
     def get_root_dir(self):
         root_dir = path.dirname(sys.argv[0])
@@ -36,6 +58,9 @@ class Main:
             ["config/config.json", "config/config-example.json"],
         )
         self.config = config.read(config_paths)
+
+    def run_app(self):
+        WebServer(self.root_dir, self.config).run()
 
 
 if __name__ == "__main__":

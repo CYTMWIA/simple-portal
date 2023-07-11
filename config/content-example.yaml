@@ -1,0 +1,37 @@
+app:
+  title: "简简单单做个导航站自己用"
+
+groups:
+- name: "这是一组链接"
+  items:
+  - title: "网站的名字"
+    url: "网站的链接"
+  - title: "SITE"
+    url: "http://"
+  - title: "SITE"
+    url: "http://"
+  - title: "SITE"
+    url: "http://"
+  - title: "SITE"
+    url: "http://"
+  - title: "SITE"
+    url: "http://"
+  - title: "SITE"
+    url: "http://"
+
+- name: "又一组链接"
+  items:
+  - title: "你可以通过 API 更新这个文件哦"
+    url: "http://"
+  - title: "我的用法是这样的"
+    url: "http://"
+  - title: "为配置单独创建一个 GitHub 仓库"
+    url: "http://"
+  - title: "然后设置 GitHub Actions"
+    url: "http://"
+  - title: "之后的配置我都是在 GitHub 编辑的"
+    url: "http://"
+  - title: "编辑提交后 GitHub 自动就会调用更新 API"
+    url: "http://"
+  - title: "设置完成后用起来还是蛮方便的（"
+    url: "http://"

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ content["app"]["title"] }}</title>
+    <style>
+        .app-title {
+            display: flex;
+            width: max-content;
+            margin: auto;
+            margin-bottom: 1em;
+            margin-top: 1em;
+        }
+
+        .groups {
+            display: flex;
+            width: max-content;
+            margin: auto;
+            max-width: 90vw;
+            flex-wrap: wrap;
+        }
+
+        .group {
+            min-width: 6em;
+            margin-right: 2em;
+            margin-bottom: 3em;
+        }
+
+        .group-title {
+            margin: 0;
+            padding-top: 0.33em;
+            padding-bottom: 0.33em;
+            padding-left: 2rem;
+            padding-right: 2rem;
+            border-bottom: solid;
+            border-top: solid;
+        }
+
+        .group ul {
+            margin: 0;
+            padding-left: 2rem;
+        }
+
+        .group li {
+            padding: 0.33em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-title">
+        <h1>{{ content["app"]["title"] }}</h1>
+    </div>
+    <div class="groups">
+        {% for group in content["groups"] %}
+        <div class="group">
+            <h2 class="group-title">{{ group["name"] }}</h2>
+            <ul>
+                {% for item in group["items"] %}
+                <li>
+                    <a target="_blank" href="{{ item['url'] }}">{{ item["title"] }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+
+</html>

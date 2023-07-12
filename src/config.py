@@ -7,7 +7,7 @@ from collections.abc import Iterable
 
 @dataclass
 class Config:
-    addr: str = "127.0.0.1"
+    addr: str = "0.0.0.0"
     port: int = 11088
     content_file: str = "./content.yaml"
     api_key: list[str] = field(default_factory=list)

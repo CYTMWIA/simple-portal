@@ -6,3 +6,4 @@ services:
       - ./config:/app/config
     ports:
       - 11088:11088
+    restart: unless-stopped

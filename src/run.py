@@ -1,10 +1,17 @@
+import hashlib
+import os
+import shutil
 import sys
-from os import path
 
 import yaml
-from flask import Flask, render_template
+from flask import Flask, abort, render_template, request
 
 import config
+
+
+def sha3_256(s: str):
+    encode = s.strip().encode("utf-8")
+    return hashlib.sha3_256(encode).digest().hex()
 
 
 class WebServer:
@@ -12,28 +19,57 @@ class WebServer:
         self.root_dir = root_dir
         self.config = _config
 
+        self.move_to_tmp_dir()
+
         self.app = Flask(__name__)
         self.bind_routes()
 
+    def move_to_tmp_dir(self):
+        self.tmp_dir = os.path.join(self.root_dir, "tmp")
+        os.makedirs(self.tmp_dir, exist_ok=True)
+
+        config_dir = os.path.join(self.root_dir, "config")
+        shutil.copytree(config_dir, self.tmp_dir, dirs_exist_ok=True)
+
+        self.content_path = os.path.join(self.tmp_dir, self.config.content_file)
+
     def bind_routes(self):
-        self.app.route("/")(self.make_index())
+        self.app.route("/")(self.__index())
+        self.app.route("/content", methods=["POST"])(self.__content())
 
     def run(self):
         self.app.run(self.config.addr, self.config.port, debug=True)
 
-    def make_index(self):
-        config_dir = path.join(self.root_dir, "config")
-        content_path = path.join(config_dir, self.config.content_file)
-        content_path = path.abspath(content_path)
-        if not path.exists(content_path):
-            raise Exception(f"Content file not exists: {content_path}")
-
+    def __index(self):
         def index():
-            with open(content_path, "r", encoding="utf-8") as f:
+            with open(self.content_path, "r", encoding="utf-8") as f:
                 content = yaml.load(f, yaml.CFullLoader)
             return render_template("index.html", content=content)
 
         return index
+
+    def __content(self):
+        def content():
+            if request.authorization is None:
+                abort(401)
+            hashed = sha3_256(str(request.authorization))
+            if hashed not in self.config.api_key:
+                abort(403)
+
+            print(request.files)
+            if "file" not in request.files:
+                abort(400)
+            file = request.files["file"]
+            # If the user does not select a file, the browser submits an
+            # empty file without a filename.
+            if file.filename == "":
+                abort(400)
+
+            if file:
+                file.save(self.content_path)
+                return ("", 200)
+
+        return content
 
 
 class Main:
@@ -47,14 +83,14 @@ class Main:
         self.run_app()
 
     def get_root_dir(self):
-        root_dir = path.dirname(sys.argv[0])
-        root_dir = path.join(root_dir, "../")
-        root_dir = path.abspath(root_dir)
+        root_dir = os.path.dirname(sys.argv[0])
+        root_dir = os.path.join(root_dir, "../")
+        root_dir = os.path.abspath(root_dir)
         self.root_dir = root_dir
 
     def read_config(self):
         config_paths = map(
-            lambda rp: path.join(self.root_dir, rp),
+            lambda rp: os.path.join(self.root_dir, rp),
             ["config/config.json", "config/config-example.json"],
         )
         self.config = config.read(config_paths)

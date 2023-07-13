@@ -50,9 +50,10 @@ class WebServer:
 
     def __content(self):
         def content():
-            if request.authorization is None:
+            password = request.headers.get("Authorization")
+            if password == None:
                 abort(401)
-            hashed = sha3_256(str(request.authorization))
+            hashed = sha3_256(password)
             if hashed not in self.config.api_key:
                 abort(403)
 

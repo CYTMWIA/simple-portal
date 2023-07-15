@@ -30,10 +30,6 @@
             margin-bottom: 3em;
         }
 
-        .group a:link, .group a:visited {
-            color: black;
-        }
-
         .group-title {
             margin: 0;
             padding-top: 0.33em;
@@ -46,11 +42,24 @@
 
         .group ul {
             margin: 0;
+            margin-top: 0.1em;
             padding-left: 2rem;
         }
 
         .group li {
             padding: 0.33em;
+        }
+
+        .group a:link, .group a:visited {
+            color: black;
+        }
+
+        .group li:hover {
+            background-color: black;
+        }
+
+        .group li:hover a:link, .group li:hover a:visited {
+            color: white;
         }
     </style>
 </head>
@@ -66,7 +75,7 @@
             <ul>
                 {% for item in group["items"] %}
                 <li>
-                    <a target="_blank" href="{{ item['url'] }}">{{ item["title"] }}</a>
+                    <a href="{{ item['url'] }}">{{ item["title"] }}</a>
                 </li>
                 {% endfor %}
             </ul>

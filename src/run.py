@@ -19,19 +19,14 @@ class WebServer:
         self.root_dir = root_dir
         self.config = _config
 
-        self.move_to_tmp_dir()
+        self.make_paths()
 
         self.app = Flask(__name__)
         self.bind_routes()
 
-    def move_to_tmp_dir(self):
-        self.tmp_dir = os.path.join(self.root_dir, "tmp")
-        os.makedirs(self.tmp_dir, exist_ok=True)
-
+    def make_paths(self):
         config_dir = os.path.join(self.root_dir, "config")
-        shutil.copytree(config_dir, self.tmp_dir, dirs_exist_ok=True)
-
-        self.content_path = os.path.join(self.tmp_dir, self.config.content_file)
+        self.content_path = os.path.join(config_dir, self.config.content_file)
 
     def bind_routes(self):
         self.app.route("/")(self.__index())

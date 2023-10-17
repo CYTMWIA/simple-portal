@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ content["app"]["title"] }}</title>
+    <title>{{ app["title"] }}</title>
     <style>
         .app-title {
             display: flex;
@@ -66,10 +66,10 @@
 
 <body>
     <div class="app-title">
-        <h1>{{ content["app"]["title"] }}</h1>
+        <h1>{{ app["title"] }}</h1>
     </div>
     <div class="groups">
-        {% for group in content["groups"] %}
+        {% for group in groups %}
         <div class="group">
             <h2 class="group-title">{{ group["name"] }}</h2>
             <ul>

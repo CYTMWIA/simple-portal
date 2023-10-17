@@ -25,15 +25,25 @@ lazy_static! {
     };
 }
 
-fn read_config() -> Result<Vec<u8>, io::Error> {
+fn read_config() -> Result<config::Config, io::Error> {
     for p in CONFIG_PATHS {
         let path = Path::new(p);
-        if path.exists() {
-            match fs::read(path) {
-                Ok(res) => return Ok(res),
-                Err(_) => {}
-            }
+        if !path.exists() {
+            continue;
         }
+
+        let reading = fs::read(path);
+        if reading.is_err() {
+            continue;
+        }
+
+        let parsing: Result<config::Config, serde_yaml::Error> =
+            serde_yaml::from_slice(reading.unwrap().as_slice());
+        if parsing.is_err() {
+            continue;
+        }
+
+        return Ok(parsing.unwrap());
     }
     return Err(io::Error::new(
         io::ErrorKind::NotFound,
@@ -42,10 +52,9 @@ fn read_config() -> Result<Vec<u8>, io::Error> {
 }
 
 async fn index() -> Html<std::string::String> {
-    let content = read_config().unwrap();
+    let config = read_config().unwrap();
 
-    let data: config::Config = serde_yaml::from_slice(content.as_slice()).unwrap();
-    let context = Context::from_serialize(data).unwrap();
+    let context = Context::from_serialize(config).unwrap();
     let render = TEMPLATES.render("index.html", &context);
 
     Html(match render {

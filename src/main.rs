@@ -103,7 +103,6 @@ async fn upload_config(headers: HeaderMap, body: Bytes) -> StatusCode {
 async fn main() {
     println!("CWD: {}", env::current_dir().unwrap().display());
 
-    // build our application with a single route
     let app = Router::new()
         .route("/", get(index))
         .route("/config", put(upload_config));

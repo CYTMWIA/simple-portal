@@ -5,6 +5,7 @@ pub struct Config {
     pub app: App,
     pub groups: Vec<UrlGroup>,
 }
+
 #[derive(Serialize, Deserialize)]
 pub struct App {
     pub title: String,

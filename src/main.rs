@@ -7,6 +7,13 @@ use tera::{Context, Tera};
 #[macro_use]
 extern crate lazy_static;
 
+static CONFIG_PATHS: [&str; 4] = [
+    "config.yaml",
+    "config/config.yaml",
+    "config-example.yaml",
+    "config/config-example.yaml",
+];
+
 lazy_static! {
     pub static ref TEMPLATES: Tera = {
         let mut tera = Tera::default();
@@ -18,13 +25,8 @@ lazy_static! {
     };
 }
 
-fn read_content_config() -> Result<Vec<u8>, io::Error> {
-    for p in [
-        "content.yaml",
-        "config/content.yaml",
-        "content-example.yaml",
-        "config/content-example.yaml",
-    ] {
+fn read_config() -> Result<Vec<u8>, io::Error> {
+    for p in CONFIG_PATHS {
         let path = Path::new(p);
         if path.exists() {
             match fs::read(path) {
@@ -35,14 +37,14 @@ fn read_content_config() -> Result<Vec<u8>, io::Error> {
     }
     return Err(io::Error::new(
         io::ErrorKind::NotFound,
-        "content file not found.",
+        "config file not found.",
     ));
 }
 
 async fn index() -> Html<std::string::String> {
-    let content = read_content_config().unwrap();
+    let content = read_config().unwrap();
 
-    let data: config::Content = serde_yaml::from_slice(content.as_slice()).unwrap();
+    let data: config::Config = serde_yaml::from_slice(content.as_slice()).unwrap();
     let context = Context::from_serialize(data).unwrap();
     let render = TEMPLATES.render("index.html", &context);
 

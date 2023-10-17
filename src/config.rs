@@ -1,23 +1,24 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-pub struct Content {
-    app: App,
-    groups: Vec<UrlGroup>,
+pub struct Config {
+    pub app: App,
+    pub groups: Vec<UrlGroup>,
 }
 #[derive(Serialize, Deserialize)]
 pub struct App {
-    title: String,
+    pub title: String,
+    pub keys: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct UrlGroup {
-    name: String,
-    items: Vec<Url>,
+    pub title: String,
+    pub items: Vec<Url>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Url {
-    title: String,
-    url: String,
+    pub title: String,
+    pub url: String,
 }

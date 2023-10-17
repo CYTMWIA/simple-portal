@@ -1,8 +1,9 @@
 app:
   title: "简简单单做个导航站自己用"
+  keys: ["123456"]
 
 groups:
-- name: "这是一组链接"
+- title: "这是一组链接"
   items:
   - title: "网站的名字"
     url: "网站的链接"
@@ -19,7 +20,7 @@ groups:
   - title: "SITE"
     url: "http://"
 
-- name: "又一组链接"
+- title: "又一组链接"
   items:
   - title: "你可以通过 API 更新这个文件哦"
     url: "http://"

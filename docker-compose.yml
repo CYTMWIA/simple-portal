@@ -1,9 +1,0 @@
-version: "3.8"
-services:
-  simple-portal:
-    build: "./"
-    volumes:
-      - ./config:/app/config
-    ports:
-      - 11088:11088
-    restart: unless-stopped

@@ -1,6 +1,7 @@
 app:
   title: "简简单单做个导航站自己用"
-  keys: ["123456"]
+  keys:
+  - "YWxhZGRpbjpvcGVuc2VzYW1l"
 
 groups:
 - title: "这是一组链接"

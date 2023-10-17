@@ -1,6 +1,13 @@
 pub mod config;
 
-use axum::{response::Html, routing::get, Router};
+use axum::{
+    body::Bytes,
+    http::{HeaderMap, StatusCode},
+    response::Html,
+    routing::get,
+    routing::put,
+    Router,
+};
 use std::{env, fs, io, path::Path};
 use tera::{Context, Tera};
 
@@ -63,12 +70,43 @@ async fn index() -> Html<std::string::String> {
     })
 }
 
+async fn upload_config(headers: HeaderMap, body: Bytes) -> StatusCode {
+    let pass: bool;
+    match read_config() {
+        Ok(res) => {
+            let auth_header = match headers.get("X-Authorization") {
+                Some(res) => res,
+                None => return StatusCode::FORBIDDEN,
+            };
+
+            match auth_header.to_str() {
+                Ok(auth) => pass = res.app.keys.contains(&auth.to_string()),
+                Err(_) => return StatusCode::FORBIDDEN,
+            }
+        }
+        Err(_) => pass = true,
+    }
+    if !pass {
+        return StatusCode::FORBIDDEN;
+    }
+
+    match fs::write(CONFIG_PATHS[0], body) {
+        Ok(_) => StatusCode::OK,
+        Err(e) => {
+            println!("{}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() {
     println!("CWD: {}", env::current_dir().unwrap().display());
 
     // build our application with a single route
-    let app = Router::new().route("/", get(index));
+    let app = Router::new()
+        .route("/", get(index))
+        .route("/config", put(upload_config));
 
     // run it with hyper on localhost:3000
     axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())

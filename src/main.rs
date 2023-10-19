@@ -32,6 +32,11 @@ lazy_static! {
     };
 }
 
+fn hash_api_key(s: &str) -> String {
+    let res = blake3::hash(s.as_bytes());
+    res.to_string()
+}
+
 fn read_config() -> Result<config::Config, io::Error> {
     for p in CONFIG_PATHS {
         let path = Path::new(p);
@@ -80,7 +85,7 @@ async fn upload_config(headers: HeaderMap, body: Bytes) -> StatusCode {
             };
 
             match auth_header.to_str() {
-                Ok(auth) => pass = res.app.keys.contains(&auth.to_string()),
+                Ok(auth) => pass = res.app.keys.contains(&hash_api_key(auth)),
                 Err(_) => return StatusCode::FORBIDDEN,
             }
         }

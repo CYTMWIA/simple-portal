@@ -10,3 +10,4 @@ ls -lh target/*/release/simple-portal | awk '{print $5,$(NF)}'
 
 mkdir -p release
 ls target/*/release/simple-portal | awk -F '/' '{printf "%s release/%s-%s",$0,$(NF),$2}' | xargs cp
+gzip release/*

@@ -8,6 +8,7 @@ use axum::{
     routing::put,
     Router,
 };
+use log::{error, info, warn};
 use std::{env, fs, io, path::Path};
 use tera::{Context, Tera};
 
@@ -41,17 +42,28 @@ fn read_config() -> Result<config::Config, io::Error> {
     for p in CONFIG_PATHS {
         let path = Path::new(p);
         if !path.exists() {
+            warn!("File '{}' not exists.", p);
             continue;
         }
 
         let reading = fs::read(path);
         if reading.is_err() {
+            error!(
+                "Could not read '{}': {}",
+                p,
+                reading.unwrap_err().to_string()
+            );
             continue;
         }
 
         let parsing: Result<config::Config, serde_yaml::Error> =
             serde_yaml::from_slice(reading.unwrap().as_slice());
         if parsing.is_err() {
+            error!(
+                "Parsing '{}' failed: {}",
+                p,
+                parsing.unwrap_err().to_string()
+            );
             continue;
         }
 
@@ -59,7 +71,7 @@ fn read_config() -> Result<config::Config, io::Error> {
     }
     return Err(io::Error::new(
         io::ErrorKind::NotFound,
-        "config file not found.",
+        "Could not find any valid config file.",
     ));
 }
 
@@ -106,7 +118,9 @@ async fn upload_config(headers: HeaderMap, body: Bytes) -> StatusCode {
 
 #[tokio::main]
 async fn main() {
-    println!("CWD: {}", env::current_dir().unwrap().display());
+    pretty_env_logger::init();
+
+    info!("CWD: {}", env::current_dir().unwrap().display());
 
     let app = Router::new()
         .route("/", get(index))

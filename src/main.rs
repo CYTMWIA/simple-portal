@@ -8,8 +8,8 @@ use axum::{
     routing::put,
     Router,
 };
-use log::{error, info, warn};
-use std::{env, fs, io, path::Path};
+use log::{info, warn};
+use std::{env, fs, path::Path};
 use tera::{Context, Tera};
 
 #[macro_use]
@@ -38,7 +38,7 @@ fn hash_api_key(s: &str) -> String {
     res.to_string()
 }
 
-fn read_config() -> Result<config::Config, io::Error> {
+fn read_config() -> Result<config::Config, String> {
     for p in CONFIG_PATHS {
         let path = Path::new(p);
         if !path.exists() {
@@ -46,37 +46,26 @@ fn read_config() -> Result<config::Config, io::Error> {
             continue;
         }
 
-        let reading = fs::read(path);
-        if reading.is_err() {
-            error!(
-                "Could not read '{}': {}",
-                p,
-                reading.unwrap_err().to_string()
-            );
-            continue;
-        }
+        let file = match fs::read(path) {
+            Ok(res) => res,
+            Err(e) => return Err(format!("Could not read '{p}': {}", e.to_string())),
+        };
 
-        let parsing: Result<config::Config, serde_yaml::Error> =
-            serde_yaml::from_slice(reading.unwrap().as_slice());
-        if parsing.is_err() {
-            error!(
-                "Parsing '{}' failed: {}",
-                p,
-                parsing.unwrap_err().to_string()
-            );
-            continue;
-        }
+        let yaml: config::Config = match serde_yaml::from_slice(file.as_slice()) {
+            Ok(res) => res,
+            Err(e) => return Err(format!("Parsing '{p}' failed: {}", e.to_string())),
+        };
 
-        return Ok(parsing.unwrap());
+        return Ok(yaml);
     }
-    return Err(io::Error::new(
-        io::ErrorKind::NotFound,
-        "Could not find any valid config file.",
-    ));
+    return Err("Could not find any valid config file.".to_owned());
 }
 
 async fn index() -> Html<std::string::String> {
-    let config = read_config().unwrap();
+    let config = match read_config() {
+        Ok(res) => res,
+        Err(e) => return Html(e),
+    };
 
     let context = Context::from_serialize(config).unwrap();
     let render = TEMPLATES.render("index.html", &context);
